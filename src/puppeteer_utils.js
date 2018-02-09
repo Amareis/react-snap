@@ -125,7 +125,7 @@ const crawl = async opt => {
    * @param {string} options
    * @returns {void}
    */
-  const addToQueue = (newUrl, options) => {
+  const addToQueue = (newUrl, options=options) => {
     const { hostname, search, hash } = url.parse(newUrl);
     newUrl = newUrl.replace(`${search || ""}${hash || ""}`, "");
     const urlOptionsStr = newUrl + " " + JSON.stringify(options);
@@ -207,7 +207,7 @@ const crawl = async opt => {
   };
 
   if (options.include) {
-    Object.entries(options.include).map(([path, options]) => addToQueue(`${basePath}${path}`, options));
+    options.include.map(localOptions => addToQueue(`${basePath}${localOptions.path}`, localOptions));
   }
 
   queue

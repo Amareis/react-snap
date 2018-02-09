@@ -87,8 +87,8 @@ const defaults = userOptions => {
     ...userOptions
   };
   options.destination = options.destination || options.source;
-  if (!options.include || !(options.include.length || options.include.constructor === Object))
-    throw new Error("include should be an array or object");
+  if (!options.include || !options.include.length)
+    throw new Error("include should be an array");
 
   let exit = false;
   if (options.preloadResources) {
@@ -119,17 +119,11 @@ const defaults = userOptions => {
   }
   options.publicPath = options.publicPath.replace(/\/$/, "");
 
-  const include = {};
-  if (options.include.length) {
-    for (const path of options.include)
-      include[options.publicPath + path] = Object.assign({}, options);
-  }
-  else {
-    for (const [path, localOptions] of Object.entries(options.include))
-      include[options.publicPath + path] = Object.assign({}, options, localOptions);
-  }
-
-  options.include = include;
+  options.include = options.include.map(pathOrOptions => {
+    const isOptions = pathOrOptions.constructor === Object;
+    const path = options.publicPath + (isOptions ? pathOrOptions.path : pathOrOptions);
+    return Object.assign({}, options, isOptions ? pathOrOptions : {}, {path})
+  });
   return options;
 };
 
