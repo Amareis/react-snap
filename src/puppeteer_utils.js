@@ -128,8 +128,9 @@ const crawl = async opt => {
   const addToQueue = (newUrl, options) => {
     const { hostname, search, hash } = url.parse(newUrl);
     newUrl = newUrl.replace(`${search || ""}${hash || ""}`, "");
-    if (hostname === "localhost" && !uniqueUrls.has(newUrl) && !streamClosed) {
-      uniqueUrls.add(newUrl);
+    const urlOptionsStr = newUrl + " " + JSON.stringify(options);
+    if (hostname === "localhost" && !uniqueUrls.has(urlOptionsStr) && !streamClosed) {
+      uniqueUrls.add(urlOptionsStr);
       enqued++;
       queue.write([newUrl, options]);
       if (enqued == 2 && options.crawl) {
