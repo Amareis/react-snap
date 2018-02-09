@@ -21,6 +21,7 @@ const defaultOptions = {
   destination: null,
   concurrency: 4,
   include: ["/"],
+  filename: undefined,
   userAgent: "ReactSnap",
   // 4 params below will be refactored to one: `puppeteer: {}`
   // https://github.com/stereobooster/react-snap/issues/120
@@ -630,6 +631,8 @@ const run = async userOptions => {
       if (options.fixInsertRule) await fixInsertRule({ page });
       await fixFormFields({ page });
 
+      if (options.filename)
+        route += options.filename;
       const routePath = route.replace(publicPath, "");
       const filePath = path.join(destinationDir, routePath);
       if (options.saveAs === "html") {
