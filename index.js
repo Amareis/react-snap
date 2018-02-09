@@ -86,8 +86,8 @@ const defaults = userOptions => {
     ...userOptions
   };
   options.destination = options.destination || options.source;
-  if (!options.include || !options.include.length)
-    throw new Error("include should be an array");
+  if (!options.include || !(options.include.length || options.include.constructor === Object))
+    throw new Error("include should be an array or object");
 
   let exit = false;
   if (options.preloadResources) {
@@ -118,9 +118,17 @@ const defaults = userOptions => {
   }
   options.publicPath = options.publicPath.replace(/\/$/, "");
 
-  options.include = options.include.map(
-    include => options.publicPath + include
-  );
+  const include = {};
+  if (options.include.length) {
+    for (const path of options.include)
+      include[options.publicPath + path] = Object.assign({}, options);
+  }
+  else {
+    for (const [path, localOptions] of Object.entries(options.include))
+      include[options.publicPath + path] = Object.assign({}, options, localOptions);
+  }
+
+  options.include = include;
   return options;
 };
 
@@ -508,7 +516,7 @@ const run = async userOptions => {
     basePath,
     publicPath,
     sourceDir,
-    beforeFetch: async ({ page, route }) => {
+    beforeFetch: async ({ page, route, options }) => {
       const {
         preloadImages,
         cacheAjaxRequests,
@@ -536,7 +544,7 @@ const run = async userOptions => {
         http2PushManifestItems[route] = hpm;
       }
     },
-    afterFetch: async ({ page, route, browser }) => {
+    afterFetch: async ({ page, route, browser, options }) => {
       const pageUrl = `${basePath}${route}`;
       if (options.removeStyleTags) await removeStyleTags({ page });
       if (options.removeScriptTags) await removeScriptTags({ page });

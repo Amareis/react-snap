@@ -121,16 +121,17 @@ const crawl = async opt => {
   const sourcemapStore = {};
 
   /**
-   * @param {string} path
+   * @param {string} newUrl
+   * @param {string} options
    * @returns {void}
    */
-  const addToQueue = newUrl => {
+  const addToQueue = (newUrl, options) => {
     const { hostname, search, hash } = url.parse(newUrl);
     newUrl = newUrl.replace(`${search || ""}${hash || ""}`, "");
     if (hostname === "localhost" && !uniqueUrls.has(newUrl) && !streamClosed) {
       uniqueUrls.add(newUrl);
       enqued++;
-      queue.write(newUrl);
+      queue.write([newUrl, options]);
       if (enqued == 2 && options.crawl) {
         addToQueue(`${basePath}${publicPath}/404.html`);
       }
@@ -147,9 +148,10 @@ const crawl = async opt => {
 
   /**
    * @param {string} pageUrl
+   * @param {string} options
    * @returns {Promise<string>}
    */
-  const fetchPage = async pageUrl => {
+  const fetchPage = async (pageUrl, options) => {
     const route = pageUrl.replace(basePath, "");
 
     let skipExistingFile = false;
@@ -175,7 +177,7 @@ const crawl = async opt => {
           },
           sourcemapStore
         });
-        beforeFetch && beforeFetch({ page, route });
+        beforeFetch && beforeFetch({ page, route, options });
         await page.setUserAgent(options.userAgent);
         await page.goto(pageUrl, { waitUntil: "networkidle0" });
         if (options.waitFor) await page.waitFor(options.waitFor);
@@ -183,7 +185,7 @@ const crawl = async opt => {
           const links = await getLinks({ page });
           links.forEach(addToQueue);
         }
-        afterFetch && (await afterFetch({ page, route, browser }));
+        afterFetch && (await afterFetch({ page, route, browser, options }));
         await page.close();
         console.log(`🕸  (${processed + 1}/${enqued}) ${route}`);
       } catch (e) {
@@ -204,11 +206,11 @@ const crawl = async opt => {
   };
 
   if (options.include) {
-    options.include.map(x => addToQueue(`${basePath}${x}`));
+    Object.entries(options.include).map(([path, options]) => addToQueue(`${basePath}${path}`, options));
   }
 
   queue
-    .map(x => _(fetchPage(x)))
+    .map(([url, options]) => _(fetchPage(url, options)))
     .mergeWithLimit(options.concurrency)
     .toArray(async function() {
       await browser.close();
