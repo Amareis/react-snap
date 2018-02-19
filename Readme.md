@@ -121,7 +121,7 @@ TODO: as soon as the feature will be stable it should be enabled by default.
 
 ### Async components
 
-Also known as [code splitting](https://webpack.github.io/docs/code-splitting.html), [dynamic import](https://github.com/tc39/proposal-dynamic-import) (TC39 proposal), "chunks" (which are loaded on demand), "layers", "rollups", or "fragments".
+Also known as [code splitting](https://webpack.js.org/guides/code-splitting/), [dynamic import](https://github.com/tc39/proposal-dynamic-import) (TC39 proposal), "chunks" (which are loaded on demand), "layers", "rollups", or "fragments". See: [Guide To JavaScript Async Components](https://github.com/stereobooster/guide-to-async-components)
 
 Async component (in React) is a technique (typically implemented as a Higher Order Component) for loading components with dynamic `import`. There are a lot of solutions in this field. Here are some examples:
 
@@ -154,8 +154,6 @@ loadComponents().then(() => {
   hydrate(AppWithRouter, rootElement);
 });
 ```
-
-**Caution**: there seems to be [an issue in `loadable-components`](https://github.com/smooth-code/loadable-components/issues/25). Be carefull.
 
 ### Redux
 
@@ -203,14 +201,6 @@ navigateFallback: publicUrl + '/index.html',
 
 you need to change this to an unprerendered version of `index.html` - `200.html`, otherwise you will see a flash of `index.html` on other pages (if you have any). See [Configure sw-precache without ejecting](https://github.com/stereobooster/react-snap/blob/master/Recipes.md#configure-sw-precache-without-ejecting) for more information.
 
-### WebGL
-
-Headless chrome does not fully support WebGL, if you need render it you can use
-
-```
-"headless": false
-```
-
 ### Containers and other restricted environments
 
 Puppeteer (headless chrome) may fail due to sandboxing issues. To get around this,
@@ -224,13 +214,9 @@ Read more about [puppeteer troubleshooting.](https://github.com/GoogleChrome/pup
 
 `"inlineCss": true` sometimes cause problems in containers
 
-#### Docker
+#### Docker + Alpine
 
-To run `react-snap` inside `docker` (especially when using alpine), you might want to use custom chromium executable. See [#93](https://github.com/stereobooster/react-snap/issues/93#issuecomment-354994505).
-
-```
-"puppeteerExecutablePath": "/usr/bin/chromium-browser"
-```
+To run `react-snap` inside `docker` with Alpine, you might want to use custom chromium executable. See [#93](https://github.com/stereobooster/react-snap/issues/93#issuecomment-354994505) and [#132](https://github.com/stereobooster/react-snap/issues/132#issuecomment-362333702)
 
 #### Heroku
 
@@ -259,6 +245,10 @@ use the following configuration:
 > https://github.com/cssinjs/jss/blob/master/docs/ssr.md
 
 This is basically mean that JSS doesn't support `rehydration`. See [#99](https://github.com/stereobooster/react-snap/issues/99) for possible solutions.
+
+### `react-router` v3
+
+See [#135](https://github.com/stereobooster/react-snap/issues/135).
 
 ## Alternatives
 

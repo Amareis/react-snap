@@ -146,7 +146,7 @@ const preloadResources = opt => {
   const uniqueResources = new Set();
   page.on("response", async response => {
     const responseUrl = response.url();
-    if (/^data:/i.test(responseUrl)) return;
+    if (/^data:|blob:/i.test(responseUrl)) return;
     const ct = response.headers["content-type"] || "";
     const route = responseUrl.replace(basePath, "");
     if (/^http:\/\/localhost/i.test(responseUrl)) {
@@ -191,13 +191,13 @@ const preloadResources = opt => {
       const urlObj = url.parse(responseUrl);
       const domain = `${urlObj.protocol}//${urlObj.host}`;
       if (uniqueResources.has(domain)) return;
+      uniqueResources.add(domain);
       await page.evaluate(route => {
         const linkTag = document.createElement("link");
         linkTag.setAttribute("rel", "preconnect");
         linkTag.setAttribute("href", route);
         document.head.appendChild(linkTag);
       }, domain);
-      uniqueResources.add(domain);
     }
   });
   return { ajaxCache, http2PushManifestItems };
